@@ -26,5 +26,10 @@
         "a photo of the large {}",
         "a photo of a cool {}",
         "a photo of a small {}"
+    ],
+    "test_prompts": [
+        "a photo of a {}",
+        "a rendering of a {}",
+        "a cropped photo of the {}"
     ]
 }
