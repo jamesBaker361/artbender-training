@@ -8,8 +8,8 @@ import unittest
 
 from unittest.mock import patch
 
-from artbender_training.cyclegan.img_helpers import *
-from artbender_training.cyclegan.cycle_data_helper import *
+from cyclegan.img_helpers import *
+from cyclegan.cycle_data_helper import *
 import numpy as np
 from datasets import load_dataset
 
@@ -30,19 +30,22 @@ class Img_Helper_Test(unittest.TestCase):
     def generate_imgs_test(self):
         dataset,_= get_datasets(1,True)
         img=next(iter(dataset))
+        print(img.shape)
         generator_g = pix2pix.unet_generator(3, norm_type='instancenorm')
         generate_images(generator_g, img, "generate_imgs_test.png")
 
-    def generate_imgs_test_batch10(self):
+    def generate_imgs_test_batch4(self):
         #dataset,_= get_datasets(2,True)
         #img=next(iter(dataset))
-        img=tf.random.normal((10,64,64,3))
+        dataset,_= get_datasets(4,True)
+        img=next(iter(dataset))
+        print(img.shape)
         generator_g = pix2pix.unet_generator(3, norm_type='instancenorm')
-        generate_images(generator_g, img, "generate_imgs_test_batch3.png")
+        generate_images(generator_g, img, "generate_imgs_test_batch4.png")
 
 
 if __name__ == '__main__':
     test=Img_Helper_Test()
     #test.display_imgs_test()
     test.generate_imgs_test()
-    test.generate_imgs_test_batch3()
+    test.generate_imgs_test_batch4()
