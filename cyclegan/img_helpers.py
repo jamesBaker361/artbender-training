@@ -21,15 +21,18 @@ def generate_images(model, test_input, save_path):
 
     plt.figure(figsize=(12, 12))
 
-    display_list = [test_input[0], prediction[0]]
-    title = ['Input Image', 'Predicted Image']
+    rows=min(4, len(prediction))
+    for c in range(1,1+rows):
 
-    for i in range(2):
-        plt.subplot(1, 2, i+1)
-        plt.title(title[i])
-        # getting the pixel values between [0, 1] to plot it.
-        plt.imshow(display_list[i] * 0.5 + 0.5)
-        plt.axis('off')
+        display_list = [test_input[c], prediction[c]]
+        title = ['Input Image', 'Predicted Image']
+
+        for i in range(2):
+            plt.subplot(rows, 2, i+c)
+            plt.title(title[i])
+            # getting the pixel values between [0, 1] to plot it.
+            plt.imshow(display_list[i] * 0.5 + 0.5)
+            plt.axis('off')
     plt.savefig(save_path)
 
     
