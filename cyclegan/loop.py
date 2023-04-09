@@ -7,14 +7,15 @@ import time
 import argparse
 from datetime import datetime, timezone
 import os
+from random import randrange
 
 parser = argparse.ArgumentParser(description='get some args')
 parser.add_argument("--epochs",type=int,help="training epochs", default=2)
 parser.add_argument("--test",type=bool, default=False)
-parser.add_argument("--batch_size", type=int,default=1)
-parser.add_argument("--save_img_parent",type=str,default="/root/notebooks/gen_imgs/cyclegan/")
+parser.add_argument("--batch_size", type=int,default=1) 
+parser.add_argument("--save_img_parent",type=str,default="/home/jlb638/Desktop/cycle/gen_imgs/cyclegan/")
 parser.add_argument("--name",type=str,default="cycle_{}".format(str(datetime.now(timezone.utc))))
-parser.add_argument("--save_model_parent", type=str,default="/root/notebooks/models/cyclegan/")
+parser.add_argument("--save_model_parent", type=str,default="../../../../../scratch/jlb638/artbender-models/cyclegan/")
 parser.add_argument("--movie_path",type=str,default="jlbaker361/movie_captioned-augmented")
 parser.add_argument("--cartoon_path",type=str, default="jlbaker361/avatar-lite_captioned-augmented")
 
@@ -115,8 +116,10 @@ def objective(trial,args):
     print('train_movie', train_cartoon)
     #x = cartoon
     #y = movie
-    train_movie_sample=[t for t in train_movie][0]
-    train_cartoon_sample=[t for t in train_cartoon][0]
+    train_movie_sample=next(iter(train_movie))
+    movie_list=[t for t in train_movie][1:]
+    train_cartoon_sample=next(iter(train_cartoon))
+    cartoon_list=[t for t in train_cartoon][1:]
     print('train_cartoon_sample', train_cartoon_sample.shape)
 
     print("begin training")
@@ -134,6 +137,10 @@ def objective(trial,args):
         # is clearly visible.
         generate_images(generator_g, train_cartoon_sample,save_folder+"/cartoontomovie{}.png".format(epoch))
         generate_images(generator_f, train_movie_sample,save_folder+"/movietocartoon{}.png".format(epoch))
+        random_movie_sample=movie_list[randrange(0,len(movie_list))]
+        random_cartoon_sample=cartoon_list[randrange(0,len(cartoon_list))]
+        generate_images(generator_g, random_cartoon_sample,save_folder+"/random_cartoontomovie{}.png".format(epoch))
+        generate_images(generator_f, random_movie_sample,save_folder+"/random_movietocartoon{}.png".format(epoch))
 
     tf.saved_model.save(generator_g,save_model_folder+"generator_g")
     tf.saved_model.save(generator_f,save_model_folder+"generator_f")

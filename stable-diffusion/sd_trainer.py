@@ -31,7 +31,10 @@ class Trainer(tf.keras.Model):
 
         with tf.GradientTape() as tape:
             # Project image into the latent space and sample from it.
-            latents = self.sample_from_encoder_outputs(self.vae(images, training=False))
+            print('images.shape',images.shape)
+            encoder_outputs=self.vae(images, training=False)
+            print('encoder_outputs.shape',encoder_outputs.shape)
+            latents = self.sample_from_encoder_outputs(encoder_outputs)
             # Know more about the magic number here:
             # https://keras.io/examples/generative/fine_tune_via_textual_inversion/
             latents = latents * 0.18215

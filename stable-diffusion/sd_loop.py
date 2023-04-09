@@ -56,10 +56,18 @@ def objective(trial,args):
     image_encoder=stable_diffusion_big.image_encoder
     diffusion_model = stable_diffusion_big.diffusion_model
 
-    vae=tf.keras.Model(
-        image_encoder.input,
-        image_encoder.layers[-2].output,
-    )
+    if args.resolution == 256:
+        vae=tf.keras.Model(
+            image_encoder.input,
+            image_encoder.layers[-2].output,
+        )
+    elif args.resolution==512:
+        vae=tf.keras.Model(
+            image_encoder.input,
+            image_encoder.layers[-2].output,
+        )
+    
+    print('vae.output.shape',vae.output.shape)
 
     diffusion_ft_trainer = Trainer(
         diffusion_model=diffusion_model,
@@ -86,3 +94,9 @@ def objective(trial,args):
         SaveModelCallback(stable_diffusion_big,save_model_folder),
         GenImgCallback(stable_diffusion_big,save_folder)
     ])
+
+if __name__ == '__main__':
+    print("begin!")
+    print(args)
+    objective(None, args)
+    print('end!')

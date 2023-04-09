@@ -21,3 +21,4 @@ class Model_Helper_Test(unittest.TestCase):
 if __name__=='__main__':
     test=Model_Helper_Test()
     test.add_new_token_test()
+    print("all done :)))")

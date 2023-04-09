@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 def display_imgs(generator_g, generator_f, test_x,test_y,save_path):
     g_x=generator_g(test_x)
@@ -22,17 +23,19 @@ def generate_images(model, test_input, save_path):
     plt.figure(figsize=(12, 12))
 
     rows=min(4, len(prediction))
-    for c in range(1,1+rows):
+    fig, axs= plt.subplots(rows, 2)
+    if len(prediction)==1:
+        axs=np.expand_dims(axs,axis=0)
+    for c in range(0,rows):
 
         display_list = [test_input[c], prediction[c]]
         title = ['Input Image', 'Predicted Image']
 
         for i in range(2):
-            plt.subplot(rows, 2, i+c)
-            plt.title(title[i])
+            axs[c,i].set_title(title[i]+ str(1+i+c))
             # getting the pixel values between [0, 1] to plot it.
-            plt.imshow(display_list[i] * 0.5 + 0.5)
-            plt.axis('off')
-    plt.savefig(save_path)
+            axs[c,i].imshow(display_list[i] * 0.5 + 0.5)
+            axs[c,i].axis('off')
+    fig.savefig(save_path)
 
     

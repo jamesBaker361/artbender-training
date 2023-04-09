@@ -84,8 +84,10 @@ def get_data_loader(test=False,resolution=512):
     all_captions = data_frame["caption"]
     for i, caption in enumerate(all_captions):
         tokenized_texts[i] = process_text(caption)
-
+    image_paths=np.array([np.array(img.resize((resolution, resolution))) for img in  data_frame["image"]])
+    print(image_paths.shape)
+    print(tokenized_texts.shape)
     training_dataset = prepare_dataset(
-        np.array([np.array(img.resize((resolution, resolution))) for img in  data_frame["image"]]), tokenized_texts, batch_size=4
+        image_paths, tokenized_texts, batch_size=4
     )
     return training_dataset
