@@ -46,6 +46,6 @@ class Img_Helper_Test(unittest.TestCase):
 
 if __name__ == '__main__':
     test=Img_Helper_Test()
-    #test.display_imgs_test()
+    test.display_imgs_test()
     test.generate_imgs_test()
     test.generate_imgs_test_batch4()

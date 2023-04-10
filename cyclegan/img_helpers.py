@@ -16,6 +16,7 @@ def display_imgs(generator_g, generator_f, test_x,test_y,save_path):
         plt.imshow(imgs[i])
 
     plt.savefig(save_path)
+    plt.close()
 
 def generate_images(model, test_input, save_path):
     prediction = model(test_input)
@@ -37,5 +38,6 @@ def generate_images(model, test_input, save_path):
             axs[c,i].imshow(display_list[i] * 0.5 + 0.5)
             axs[c,i].axis('off')
     fig.savefig(save_path)
+    plt.close()
 
     

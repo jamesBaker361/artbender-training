@@ -22,6 +22,24 @@ class Loop_Test(unittest.TestCase):
         args.epochs=2
         objective(None,args)
 
+    def objective_saving_test(self):
+        print('objective_saving_test')
+        args.epochs=11
+        args.save=True
+        args.name="save_test"
+        objective(None,args)
+
+    def objective_load_test(self):
+        print('objective_load_test')
+        args.epochs=12
+        args.load=True
+        args.name="save_test"
+        args.save=False
+        objective(None,args)
+
+
 if __name__ == '__main__':
     test=Loop_Test()
     test.objective_test()
+    test.objective_saving_test()
+    test.objective_load_test()

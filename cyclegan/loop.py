@@ -19,6 +19,8 @@ parser.add_argument("--name",type=str,default="cycle_{}".format(str(datetime.now
 parser.add_argument("--save_model_parent", type=str,default="../../../../../scratch/jlb638/artbender-models/cyclegan/")
 parser.add_argument("--movie_path",type=str,default="jlbaker361/movie_captioned-augmented")
 parser.add_argument("--cartoon_path",type=str, default="jlbaker361/avatar-lite_captioned-augmented")
+parser.add_argument("--load", type=bool, default=False, help="whether to load previous model if possible")
+parser.add_argument("--save", type=bool, default=False, help='whether to save model')
 
 args = parser.parse_args()
 
@@ -30,12 +32,22 @@ def objective(trial,args):
 
     print(args)
     OUTPUT_CHANNELS = 3
+    start_epoch=0
 
-    generator_g = pix2pix.unet_generator(OUTPUT_CHANNELS, norm_type='instancenorm')
-    generator_f = pix2pix.unet_generator(OUTPUT_CHANNELS, norm_type='instancenorm')
+    if args.load:
+        generator_g=tf.saved_model.load(save_model_folder+"generator_g")
+        generator_f=tf.saved_model.load(save_model_folder+"generator_f")
+        discriminator_x=tf.saved_model.load(save_model_folder+"discriminator_x")
+        discriminator_y=tf.saved_model.load(save_model_folder+"discriminator_y")
+        with open(save_model_folder+"/meta_data.json","r") as src_file:
+            start_epoch=json.load(src_file)["epoch"]
+    else:
 
-    discriminator_x = pix2pix.discriminator(norm_type='instancenorm', target=False)
-    discriminator_y = pix2pix.discriminator(norm_type='instancenorm', target=False)
+        generator_g = pix2pix.unet_generator(OUTPUT_CHANNELS, norm_type='instancenorm')
+        generator_f = pix2pix.unet_generator(OUTPUT_CHANNELS, norm_type='instancenorm')
+
+        discriminator_x = pix2pix.discriminator(norm_type='instancenorm', target=False)
+        discriminator_y = pix2pix.discriminator(norm_type='instancenorm', target=False)
 
     generator_g_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
     generator_f_optimizer = tf.keras.optimizers.Adam(2e-4, beta_1=0.5)
@@ -124,7 +136,7 @@ def objective(trial,args):
     print('train_cartoon_sample', train_cartoon_sample.shape)
 
     print("begin training")
-    for epoch in range(args.epochs):
+    for epoch in range(start_epoch,args.epochs):
         start = time.time()
         n = 0
         for image_x, image_y in tf.data.Dataset.zip((train_cartoon, train_movie)):
@@ -143,7 +155,7 @@ def objective(trial,args):
         generate_images(generator_g, random_cartoon_sample,save_folder+"/random_cartoontomovie{}.png".format(epoch))
         generate_images(generator_f, random_movie_sample,save_folder+"/random_movietocartoon{}.png".format(epoch))
 
-        if epoch%10==0:
+        if epoch%10==0 and args.save:
             meta_data = {"epoch":epoch}
             tf.saved_model.save(generator_g,save_model_folder+"generator_g")
             tf.saved_model.save(generator_f,save_model_folder+"generator_f")
