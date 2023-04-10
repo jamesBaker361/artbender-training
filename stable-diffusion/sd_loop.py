@@ -64,7 +64,7 @@ def objective(trial,args):
     elif args.resolution==512:
         vae=tf.keras.Model(
             image_encoder.input,
-            image_encoder.layers[-2].output,
+            image_encoder.layers[-1].output,
         )
     
     print('vae.output.shape',vae.output.shape)

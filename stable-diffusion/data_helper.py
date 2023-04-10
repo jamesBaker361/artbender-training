@@ -23,13 +23,15 @@ POS_IDS = tf.convert_to_tensor([list(range(MAX_PROMPT_LENGTH))], dtype=tf.int32)
 
 # Load the tokenizer.
 tokenizer = SimpleTokenizer()
-augmenter = keras_cv.layers.Augmenter(
-    layers=[
-        keras_cv.layers.CenterCrop(RESOLUTION, RESOLUTION),
-        keras_cv.layers.RandomFlip(),
-        tf.keras.layers.Rescaling(scale=1.0 / 127.5, offset=-1),
-    ]
-)
+def get_augmenter(resolution):
+    augmenter = keras_cv.layers.Augmenter(
+        layers=[
+            keras_cv.layers.CenterCrop(resolution, resolution),
+            keras_cv.layers.RandomFlip(),
+            tf.keras.layers.Rescaling(scale=1.0 / 127.5, offset=-1),
+        ]
+    )
+    return augmenter
 text_encoder = TextEncoder(MAX_PROMPT_LENGTH)
 
 #  Method to tokenize and pad the tokens.
@@ -39,13 +41,19 @@ def process_text(caption):
     return np.array(tokens)
 
 
-def process_image(image, tokenized_text):
-    image = tf.image.resize(image, (RESOLUTION, RESOLUTION))
-    return image, tokenized_text
+def get_process_image(resolution):
+    def process_image(image, tokenized_text):
+        image = tf.image.resize(image, (resolution,resolution))
+        return image, tokenized_text
+    return process_image
 
 
-def apply_augmentation(image_batch, token_batch):
-    return augmenter(image_batch), token_batch
+
+def get_apply_augmentation(resolution):
+    augmenter=get_augmenter(resolution)
+    def apply_augmentation(image_batch, token_batch):
+        return augmenter(image_batch), token_batch
+    return apply_augmentation
 
 
 def run_text_encoder(image_batch, token_batch):
@@ -64,7 +72,10 @@ def prepare_dict(image_batch, token_batch, encoded_text_batch):
     }
 
 
-def prepare_dataset(image_paths, tokenized_texts, batch_size=1):
+def prepare_dataset(image_paths, tokenized_texts,resolution, batch_size):
+    process_image=get_process_image(resolution)
+    apply_augmentation=get_apply_augmentation(resolution)
+
     dataset = tf.data.Dataset.from_tensor_slices((image_paths, tokenized_texts))
     dataset = dataset.shuffle(batch_size * 10)
     dataset = dataset.map(process_image, num_parallel_calls=AUTO).batch(batch_size)
@@ -73,7 +84,7 @@ def prepare_dataset(image_paths, tokenized_texts, batch_size=1):
     dataset = dataset.map(prepare_dict, num_parallel_calls=AUTO)
     return dataset.prefetch(AUTO)
 
-def get_data_loader(test=False,resolution=512):
+def get_data_loader(test=False,resolution=512, batch_size=4):
     if test:
         data_frame= load_dataset("jlbaker361/little_dataset",split="train")
     else:
@@ -88,6 +99,6 @@ def get_data_loader(test=False,resolution=512):
     print(image_paths.shape)
     print(tokenized_texts.shape)
     training_dataset = prepare_dataset(
-        image_paths, tokenized_texts, batch_size=4
+        image_paths, tokenized_texts,resolution, batch_size
     )
     return training_dataset

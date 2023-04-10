@@ -8,6 +8,7 @@ import argparse
 from datetime import datetime, timezone
 import os
 from random import randrange
+import json
 
 parser = argparse.ArgumentParser(description='get some args')
 parser.add_argument("--epochs",type=int,help="training epochs", default=2)
@@ -142,8 +143,17 @@ def objective(trial,args):
         generate_images(generator_g, random_cartoon_sample,save_folder+"/random_cartoontomovie{}.png".format(epoch))
         generate_images(generator_f, random_movie_sample,save_folder+"/random_movietocartoon{}.png".format(epoch))
 
-    tf.saved_model.save(generator_g,save_model_folder+"generator_g")
-    tf.saved_model.save(generator_f,save_model_folder+"generator_f")
+        if epoch%10==0:
+            meta_data = {"epoch":epoch}
+            tf.saved_model.save(generator_g,save_model_folder+"generator_g")
+            tf.saved_model.save(generator_f,save_model_folder+"generator_f")
+            tf.saved_model.save(discriminator_x,save_model_folder+"discriminator_x")
+            tf.saved_model.save(discriminator_y,save_model_folder+"discriminator_y")
+            json_object = json.dumps(meta_data, indent=4)
+ 
+            # Writing to sample.json
+            with open(save_model_folder+"/meta_data.json", "w+") as outfile:
+                outfile.write(json_object)
 
 if __name__ == '__main__':
     print("begin!")
